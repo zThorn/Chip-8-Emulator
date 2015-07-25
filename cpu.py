@@ -68,7 +68,7 @@ class cpu:
     #Consider this the "Update Loop"
     def cycle(self):
 
-        self.opcode = (self.memory[self.pc] << 8) | self.memory[self.pc + 1]
+        self.opcode = (self.memory[self.pc] << 8) | (self.memory[self.pc + 1])
         #Forward the program counter
         self.pc += 2
         #Pull out VX & VY
@@ -108,52 +108,52 @@ class cpu:
 
     #Jumps to address line NNN (this is passed in by the opcode)
     def op_1NNN(self):
-        print("1NNN")
         self.pc = self.opcode & 0x0fff
-
 
     def op_2NNN(self):
         print("2NNN")
         self.stack.append(self.pc)
         self.pc = self.opcode & 0x0fff
+
     def op_3XNN(self):
         print("3XNN")
-        if self.vx == (self.opcode & 0x00ff):
+        if self.registers[self.vx] == (self.opcode & 0x00ff):
             self.pc += 2
 
     def op_4XNN(self):
         print("4XNN")
-        if self.vx != (self.opcode & 0x00ff):
+        if self.registers[self.vx] != (self.opcode & 0x00ff):
             self.pc += 2
 
     def op_5XY0(self):
         print("5XY0")
-        if self.vx == self.vy:
+        if self.registers[self.vx] == self.registers[self.vy]:
             self.pc += 2
 
     def op_6XNN(self):
         print("6XNN")
-        self.vx = (self.opcode & 0x00ff):
+        self.registers[self.vx] = (self.opcode & 0x00ff)
 
     def op_7XNN(self):
+        #This opcode takes in 2 arguments, we're &'ing the opcode with 0x00ff to pull these out'
         print("7XNN")
-        self.vx + (self.opcode & 0x00ff)
+        self.registers[self.vx] + (self.opcode & 0x00ff)
 
     def op_8XY0(self):
         print("8XY0")
-        self.vx = self.vy
+        self.registers[self.vx] = self.registers[self.vy]
 
     def op_8XY1(self):
         print("8XY1")
-        self.vx = (self.vx | self.vy)
+        self.registers[self.vx] = (self.registers[self.vx] | self.registers[self.vy])
 
     def op_8XY2(self):
         print("8XY2")
-        self.vx = (self.vx & self.vy)
+        self.registers[self.vx]= (self.registers[self.vx] & self.registers[self.vy])
 
     def op_8XY3(self):
         print("8XY3")
-        self.vx = (self.vx ^ self.vy)
+        self.registers[self.vx]= (self.registers[self.vx] ^ self.registers[self.vy])
 
     def op_8XY4(self):
         print("8XY4")
@@ -230,5 +230,6 @@ class cpu:
         #This should error out once the mem limit is hit, for obv reasons
         while(True):
             self.cycle()
-chip8 = cpu()
-chip8.main()
+
+#chip8 = cpu()
+#chip8.main()
