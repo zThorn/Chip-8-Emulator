@@ -204,6 +204,14 @@ class Chip8Tests(unittest.TestCase):
 		self.assertEqual(self.testCPU.pc, 0x112)
 		print("BNNN success!")
 
+	#Theres really no good way to unit test a random number generator....
+	#Ive checked to make sure this does return different numbers, im leaving this
+	#in for no good reason.
+	def testCXNN(self):
+		self.testCPU.opcode = 0x0011
+		self.testCPU.op_CXNN()
+
+
 
 #Add the appropriate unit test call here!
 test = Chip8Tests()

@@ -1,6 +1,6 @@
 __author__ = 'zachery.thornton'
 import sys
-
+import random
 class cpu:
     #Program counter
     def __init__(self):
@@ -195,8 +195,10 @@ class cpu:
     def op_BNNN(self):
         self.pc = (self.opcode & 0x0FFF) + self.registers[0]
 
+    #Sets vx to a random number masked by NN
     def op_CXNN(self):
-        print("CXNN")
+        self.registers[self.vx] = (random.randint(0x0,0xFF) & (self.opcode & 0x00FF))
+        print(self.registers[self.vx])
 
     def op_DXYN(self):
         print("DXYN")
