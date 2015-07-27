@@ -141,6 +141,14 @@ class Chip8Tests(unittest.TestCase):
 		self.assertEqual(self.testCPU.registers[0xf],1)
 		print("8XY5 success!")
 
+	def test8XY6(self):
+		self.testCPU.vx = 0
+		self.testCPU.registers[self.testCPU.vx] = 0xF1
+		self.testCPU.op_8XY6()
+		self.assertEqual(self.testCPU.registers[0xf],1)
+		self.assertEqual(self.testCPU.registers[self.testCPU.vx],0x78)
+		print("8XY6 success!")
+
 #Add the appropriate unit test call here!
 test = Chip8Tests()
 #This should only be called once, its to initialize the environment
@@ -157,5 +165,6 @@ test.test8XY2()
 test.test8XY3()
 test.test8XY4()
 test.test8XY5()
+test.test8XY6()
 #Destroys the test CPU object
 test.tearDown()

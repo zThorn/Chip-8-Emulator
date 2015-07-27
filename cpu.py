@@ -161,9 +161,10 @@ class cpu:
             self.registers[0xf] = 1
         self.registers[self.vx] -= self.registers[self.vy]
 
-
+    # Bit shifts VX right by 1. VF is set to the value of the least significant bit of VX before the shift    
     def op_8XY6(self):
-        print("8XY6")
+        self.registers[0xf] = self.registers[self.vx] & 0x01
+        self.registers[self.vx]  = self.registers[self.vx] >> 1
 
     def op_8XY7(self):
         print("8XY7")
