@@ -15,7 +15,7 @@ class Chip8Tests(unittest.TestCase):
 		self.testCPU.op_1NNN()
 		#0x222h == 546d
 		self.assertEqual(self.testCPU.pc,0x222)
-
+		print("1NNN Success!")
 	def test3XNN(self):
 		#Configure the variables to values that make sense
 		self.testCPU.vx = 0
@@ -28,6 +28,7 @@ class Chip8Tests(unittest.TestCase):
 
 		#Assert that the values make sense!
 		self.assertEqual(self.testCPU.pc,2)
+		print("3XNN Success!")
 
 	def test4XNN(self):
 		#Configure the variables to values that make sense
@@ -39,6 +40,7 @@ class Chip8Tests(unittest.TestCase):
 		self.testCPU.op_4XNN()
 
 		self.assertEqual(self.testCPU.pc,2)
+		print("4XNN Success!")
 
 	def test5XY0(self):
 		#Configure the variables to values that make sense
@@ -52,7 +54,76 @@ class Chip8Tests(unittest.TestCase):
 		self.testCPU.op_5XY0()
 
 		self.assertEqual(self.testCPU.pc,2)
+		print("5XY0 Success!")
 
+	def test6XNN(self):
+		self.testCPU.opcode = 0x3F31
+		self.testCPU.vx = 0
+
+		self.testCPU.op_6XNN()
+		self.assertEqual(self.testCPU.registers[self.testCPU.vx],0x31)
+		print("6XNN Success!")
+
+	def test7XNN(self):
+		self.testCPU.vx = 0
+		self.testCPU.registers[self.testCPU.vx] = 0x20
+		self.testCPU.opcode = 0x1120
+		self.testCPU.op_7XNN()
+		self.assertEqual(self.testCPU.registers[self.testCPU.vx],0x40)
+		print("7XNN  success!")
+
+	def test8XY0(self):
+		self.testCPU.vx = 0
+		self.testCPU.vy = 1
+		self.testCPU.registers[self.testCPU.vy] = 0x25
+
+		self.testCPU.op_8XY0()
+		self.assertEqual(self.testCPU.registers[self.testCPU.vx], 0x25)
+		print("8XY0 success!")
+	def test8XY1(self):
+		self.testCPU.vx = 0
+		self.testCPU.vy = 1
+		self.testCPU.registers[self.testCPU.vx] = 0x20
+		self.testCPU.registers[self.testCPU.vy] = 0x25
+
+		self.testCPU.op_8XY1()
+		self.assertEqual(self.testCPU.registers[self.testCPU.vx], 0x25)
+		print("8XY1 success!")
+
+	def test8XY2(self):
+		self.testCPU.vx = 0
+		self.testCPU.vy = 1
+		self.testCPU.registers[self.testCPU.vx] = 0x20
+		self.testCPU.registers[self.testCPU.vy] = 0x25
+
+		self.testCPU.op_8XY2()
+		self.assertEqual(self.testCPU.registers[self.testCPU.vx], 0x20)
+		print("8XY2 success!")
+	
+	def test8XY3(self):
+		self.testCPU.vx = 0
+		self.testCPU.vy = 1
+		self.testCPU.registers[self.testCPU.vx] = 0x20
+		self.testCPU.registers[self.testCPU.vy] = 0x25
+
+		self.testCPU.op_8XY3()
+		self.assertEqual(self.testCPU.registers[self.testCPU.vx], 0x5)
+		print("8XY3 success!")
+
+	def test8XY4(self):
+		self.testCPU.vx = 0
+		self.testCPU.vy = 1
+		self.testCPU.registers[self.testCPU.vx] = 0xFF
+		self.testCPU.registers[self.testCPU.vy] = 0x1
+
+		self.testCPU.op_8XY4()
+		self.assertEqual(self.testCPU.registers[0xf],1)
+
+		self.testCPU.registers[self.testCPU.vx] = 0xFE
+		self.testCPU.registers[self.testCPU.vy] = 0x01
+
+		self.testCPU.op_8XY4()
+		self.assertEqual(self.testCPU.registers[0xf],0)
 #Add the appropriate unit test call here!
 test = Chip8Tests()
 #This should only be called once, its to initialize the environment
@@ -61,5 +132,12 @@ test.test1NNN()
 test.test3XNN()
 test.test4XNN()
 test.test5XY0()
+test.test6XNN()
+test.test7XNN()
+test.test8XY0()
+test.test8XY1()
+test.test8XY2()
+test.test8XY3()
+test.test8XY4()
 #Destroys the test CPU object
 test.tearDown()

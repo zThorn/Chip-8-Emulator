@@ -5,7 +5,7 @@ class cpu:
     #Program counter
     def __init__(self):
         #Registers
-        self.registers = bytearray(16)
+        self.registers = [0] * 16
         #4k of memory!
         self.memory =  [0]*4096
         #Start the program counter at the start of the program
@@ -130,6 +130,7 @@ class cpu:
         if self.registers[self.vx] == self.registers[self.vy]:
             self.pc += 2
 
+    #This should set register at VX == NN
     def op_6XNN(self):
         print("6XNN")
         self.registers[self.vx] = (self.opcode & 0x00ff)
@@ -137,7 +138,7 @@ class cpu:
     def op_7XNN(self):
         #This opcode takes in 2 arguments, we're &'ing the opcode with 0x00ff to pull these out'
         print("7XNN")
-        self.registers[self.vx] + (self.opcode & 0x00ff)
+        self.registers[self.vx] += (self.opcode & 0x00ff)
 
     def op_8XY0(self):
         print("8XY0")
@@ -155,8 +156,14 @@ class cpu:
         print("8XY3")
         self.registers[self.vx]= (self.registers[self.vx] ^ self.registers[self.vy])
 
+#Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't.
     def op_8XY4(self):
         print("8XY4")
+        if (self.registers[self.vx] + self.registers[self.vy]) > 0xff:
+            self.registers[0xf] = 1
+        else:
+            self.registers[0xf] = 0
+        self.registers[self.vx] += self.registers[self.vy]
 
     def op_8XY5(self):
         print("8XY5")
