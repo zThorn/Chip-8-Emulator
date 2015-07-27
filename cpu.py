@@ -15,6 +15,9 @@ class cpu:
 
         self.stack = []
 
+        #Also known as I or Index register
+        self.address_register = 0
+
         ## This is a list of all chip-8 instructions.
         ## In order to implement a chip-8 fxn, simply name your
         ## function after the opcode you are attempting to implement
@@ -183,9 +186,9 @@ class cpu:
     def op_9XY0(self):
         if self.registers[self.vx] != self.registers[self.vy]:
             self.pc += 2
-            
+    #Sets I to the address NNN.
     def op_ANNN(self):
-        print("ANNN")
+        self.address_register = (self.opcode & 0x0FFF)
 
     def op_BNNN(self):
         print("BNNN")
