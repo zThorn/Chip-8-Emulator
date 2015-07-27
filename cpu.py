@@ -166,8 +166,13 @@ class cpu:
         self.registers[0xf] = self.registers[self.vx] & 0x01
         self.registers[self.vx]  = self.registers[self.vx] >> 1
 
+    #VX is subtracted from VY ( VY-VX). If there is a borrow, VF is set to 0, else it is set to 1.
     def op_8XY7(self):
-        print("8XY7")
+        if self.registers[self.vy] - self.registers[self.vx] < 0x0:
+            self.registers[0xf] = 0
+        else:
+            self.registers[0xf] = 1
+        self.registers[self.vy] -= self.registers[self.vx]
 
     def op_8XYE(self):
         print("8XYE")
