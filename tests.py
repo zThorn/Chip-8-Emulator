@@ -196,6 +196,14 @@ class Chip8Tests(unittest.TestCase):
 		self.assertEqual(self.testCPU.address_register,0xE1E)
 		print("ANNN success!")
 
+	def testBNNN(self):
+		self.testCPU.registers[0] = 0x1
+		self.testCPU.opcode = 0xF111
+
+		self.testCPU.op_BNNN()
+		self.assertEqual(self.testCPU.pc, 0x112)
+		print("BNNN success!")
+
 
 #Add the appropriate unit test call here!
 test = Chip8Tests()
@@ -218,5 +226,6 @@ test.test8XY7()
 test.test8XYE()
 test.test9XY0()
 test.testANNN()
+test.testBNNN()
 #Destroys the test CPU object
 test.tearDown()

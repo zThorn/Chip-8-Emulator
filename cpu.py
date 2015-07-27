@@ -186,12 +186,14 @@ class cpu:
     def op_9XY0(self):
         if self.registers[self.vx] != self.registers[self.vy]:
             self.pc += 2
+
     #Sets I to the address NNN.
     def op_ANNN(self):
         self.address_register = (self.opcode & 0x0FFF)
 
+    #Jumps to the address NNN plus V0.  Essentially a jmp
     def op_BNNN(self):
-        print("BNNN")
+        self.pc = (self.opcode & 0x0FFF) + self.registers[0]
 
     def op_CXNN(self):
         print("CXNN")
