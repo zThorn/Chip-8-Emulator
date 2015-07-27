@@ -179,9 +179,11 @@ class cpu:
         self.registers[0xf] = self.registers[self.vx] & 0x01
         self.registers[self.vx]  = self.registers[self.vx] << 1
 
+    #Skips the next instruction if VX != VY
     def op_9XY0(self):
-        print("9XY0")
-
+        if self.registers[self.vx] != self.registers[self.vy]:
+            self.pc += 2
+            
     def op_ANNN(self):
         print("ANNN")
 
