@@ -236,7 +236,7 @@ class cpu:
             self.pc += 2
 
     def op_EX93(self):
-        print("EX93");
+        print("EX93")
 
     def op_EXA1(self):
         # Skips the next instruction if the key stored in VX isn't pressed
