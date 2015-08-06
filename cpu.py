@@ -14,6 +14,9 @@ class cpu:
         self.opcode = 0
 
         self.stack = []
+        self.key_inputs = [0] * 16
+        self.delay_timer = 0
+        self.sound_timer = 0
 
         #Also known as I or Index register
         self.address_register = 0
@@ -94,7 +97,13 @@ class cpu:
         for index in range(0, len(rom)):
             #Programs by definition start at 0x200, as 0x000->0x200 will be the font file
             self.memory[index + 0x200] = rom[index]
-
+            
+            
+    def _get_key(self):
+        for index in range(16):
+            if self.key_inputs[index] == 1:
+                return index
+        return -1
 
 ######################
 ######OPERATIONS######
@@ -204,25 +213,39 @@ class cpu:
         print("DXYN")
 
     def op_EX9E(self):
-        print("EX9E")
+        # Skips the next instruction if the key stored in VX is pressed
+        key = self.registers[self.vx] & 0xf
+        if self.key_inputs[key] ==1:
+            self.pc += 2
 
     def op_EX93(self):
         print("EX93")
 
     def op_EXA1(self):
-        print("EXA1")
+        # Skips the next instruction if the key stored in VX isn't pressed
+        key = self.registers[self.vx] & 0xf
+        if self.key_inputs[key] ==0:
+            self.pc += 2
 
     def op_FX07(self):
-        print("FX07")
+        # Sets VX to the value of the delay timer
+        self.registers[self.vx] = self.delay_timer
 
     def op_FX0A(self):
-        print("FX0A")
+        # A key press is awaited, and then stored in VX
+        ret = self._get_key()
+        if ret >= 0:
+            self.registers[self.vx] = ret
+        else:
+            self.pc -= 2
 
     def op_FX15(self):
-        print("FX15")
+        # Sets the delay timer to VX
+        self.delaytimer = self.registers[self.vx]
 
     def op_FX18(self):
-        print("FX18")
+        #Set sound timer to VX
+        self.sound_timer = self.registers[self.vx]
 
     def op_FX1E(self):
         print("FX1E")
