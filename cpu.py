@@ -8,6 +8,8 @@ class cpu:
         self.registers = [0] * 16
         #4k of memory!
         self.memory =  [0]*4096
+        self.emulator = emulator
+        self.graphics = [[0 for x in range(32)] for y in range(64)]
         #Start the program counter at the start of the program
         self.pc = 0x200
         #Current opcode, gets initialized to 0
@@ -210,7 +212,22 @@ class cpu:
         print(self.registers[self.vx])
 
     def op_DXYN(self):
-        print("DXYN")
+        #draws sprites
+        x = self.registers[self.vx] & 0xff
+        y = self.registers[self.vy] & 0xff
+        height = self.opcode & 0x000f
+        self.registers[0xf] = 0
+        for y_offset in range(height):
+            current_row = self.memory[y_offset + self.address_register]
+            for x_offset in range(8):
+                if y + y_offset >= 32 or (x + x_offset) >= 64:
+                    continue
+                if current_row & (0x80 >> x_offset) != 0:
+                    if self.graphics[x + x_offset][y + y_offset]:
+                        self.registers[0xf] = 1
+                    self.graphics[x + x_offset][y + y_offset] ^= 1
+                    self.emulator.draw_pixel(x + x_offset, y + y_offset)
+        self.emulator.flip()
 
     def op_EX9E(self):
         # Skips the next instruction if the key stored in VX is pressed
@@ -219,7 +236,7 @@ class cpu:
             self.pc += 2
 
     def op_EX93(self):
-        print("EX93")
+        print("EX93");
 
     def op_EXA1(self):
         # Skips the next instruction if the key stored in VX isn't pressed
@@ -261,13 +278,20 @@ class cpu:
         self.address_register = (5 * (self.registers[self.vx])) & 0xfff
 
     def op_FX33(self):
-        print("FX33")
+        #store a number as BCD(Binary Coded Decimal)
+        self.memory[self.address_registers] = int(self.registers[self.vx] / 100)
+        self.memory[self.address_registers + 1] = int(self.registers[self.vx] / 10) % 10
+        self.memory[self.address_registers + 2] = (self.registers[self.vx] % 10)
 
     def op_F055(self):
-        print("F055")
+        #stores V0 to VX in memory starting at address I
+        for index in range(0, self.vx + 1):
+            self.memory[self.address_registers + index] = self.registers[index]
 
     def op_FX65(self):
-        print("FX65")
+        #stores V0 to VX with values from memory starting at address I
+        for index in range(0, self.vx + 1):
+            self.registers[index] = self.memory[self.address_registers + index]
 
     def op_FZZZ(self):
         print("FZZZ")
