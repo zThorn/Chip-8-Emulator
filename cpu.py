@@ -248,10 +248,17 @@ class cpu:
         self.sound_timer = self.registers[self.vx]
 
     def op_FX1E(self):
-        print("FX1E")
+        #Adds VX to I, If overflow, VF = 1
+        self.address_register += self.registers[self.vx]
+        if self.address_register > 0xfff:
+            self.registers[0xf] = 1
+            self.address_register &= 0xfff
+        else:
+            self.registers[0xf] = 0
 
     def op_FX29(self):
-        print("FX29")
+        #sets I to the location of the sprite for the character in VX.
+        self.address_register = (5 * (self.registers[self.vx])) & 0xfff
 
     def op_FX33(self):
         print("FX33")
