@@ -1,24 +1,40 @@
-__author__ = 'zachery.thornton'
-import sys
 import random
-class cpu:
-    #Program counter
-    def __init__(self):
+
+fonts = [0xF0, 0x90, 0x90, 0x90, 0xF0,  # 0
+         0x20, 0x60, 0x20, 0x20, 0x70,  # 1
+         0xF0, 0x10, 0xF0, 0x80, 0xF0,  # 2
+         0xF0, 0x10, 0xF0, 0x10, 0xF0,  # 3
+         0x90, 0x90, 0xF0, 0x10, 0x10,  # 4
+         0xF0, 0x80, 0xF0, 0x10, 0xF0,  # 5
+         0xF0, 0x80, 0xF0, 0x90, 0xF0,  # 6
+         0xF0, 0x10, 0x20, 0x40, 0x40,  # 7
+         0xF0, 0x90, 0xF0, 0x90, 0xF0,  # 8
+         0xF0, 0x90, 0xF0, 0x10, 0xF0,  # 9
+         0xF0, 0x90, 0xF0, 0x90, 0x90,  # A
+         0xE0, 0x90, 0xE0, 0x90, 0xE0,  # B
+         0xF0, 0x80, 0x80, 0x80, 0xF0,  # C
+         0xE0, 0x90, 0x90, 0x90, 0xE0,  # D
+         0xF0, 0x80, 0xF0, 0x80, 0xF0,  # E
+         0xF0, 0x80, 0xF0, 0x80, 0x80]  # F
+
+
+class CPU(object):
+
+    def __init__(self, disp):
         #Registers
         self.registers = [0] * 16
         #4k of memory!
-        self.memory =  [0]*4096
-        self.emulator = emulator
+        self.memory = [0]*4096
+        self.display = disp
         self.graphics = [[0 for x in range(32)] for y in range(64)]
         #Start the program counter at the start of the program
         self.pc = 0x200
-        #Current opcode, gets initialized to 0
-        self.opcode = 0
+        #Current opcode, gets initialized to 0F so python assumes this is a hex #
+        self.opcode = 0x0F
 
         self.stack = []
         self.key_inputs = [0] * 16
         self.delay_timer = 0
-        self.sound_timer = 0
 
         #Also known as I or Index register
         self.address_register = 0
@@ -29,42 +45,82 @@ class cpu:
         ##
         self.INSTRUCTION_SET = {
             0x0000: self.op_0ZZZ,
+
             0x00E0: self.op_00E0,
+
             0x00EE: self.op_00EE,
+
             0x1000: self.op_1NNN,
+
             0x2000: self.op_2NNN,
+
             0x3000: self.op_3XNN,
+
             0x4000: self.op_4XNN,
+
             0x5000: self.op_5XY0,
+
             0x6000: self.op_6XNN,
+
             0x7000: self.op_7XNN,
-            0x8000: self.op_8XY0,
-            0x8001: self.op_8XY1,
-            0x8002: self.op_8XY2,
-            0x8003: self.op_8XY3,
-            0x8004: self.op_8XY4,
-            0x8005: self.op_8XY5,
-            0x8006: self.op_8XY6,
-            0x8007: self.op_8XY7,
-            0x800E: self.op_8XYE,
+
+            0x8000: self.op_8ZZZ,
+
+            0x8FF0: self.op_8XY0,
+
+            0x8FF01: self.op_8XY1,
+
+            0x8FF2: self.op_8XY2,
+
+            0x8FF3: self.op_8XY3,
+
+            0x8FF4: self.op_8XY4,
+
+            0x8FF5: self.op_8XY5,
+
+            0x8FF6: self.op_8XY6,
+
+            0x8FF7: self.op_8XY7,
+
+            0x8FFE: self.op_8XYE,
+
             0x9000: self.op_9XY0,
+
             0xA000: self.op_ANNN,
+
             0xB000: self.op_BNNN,
+
             0xC000: self.op_CXNN,
+
             0xD000: self.op_DXYN,
+
+            0xE000: self.op_EZZZ,
+
             0xE09E: self.op_EX9E,
+
             0xE0A1: self.op_EXA1,
+
             0xF000: self.op_FZZZ,
+
             0xF007: self.op_FX07,
+
             0xF00A: self.op_FX0A,
+
             0xF015: self.op_FX15,
+
             0xF018: self.op_FX18,
+
             0xF01E: self.op_FX1E,
+
             0xF029: self.op_FX29,
+
             0xF033: self.op_FX33,
+
             0xF055: self.op_F055,
+
             0xF065: self.op_FX65,
         }
+
 
     def dumpregs(self):
         print("##########")
@@ -84,37 +140,33 @@ class cpu:
         self.vy = (self.opcode & 0x00f0) >> 4
 
         #Decode the opcode from memory
-        extracted_op = self.opcode & 0xf000
+        self.lookupOP(self.opcode & 0xf000)
 
-        try:
-            #Get the appropriate opcode's function, and execute
-            func = self.INSTRUCTION_SET[extracted_op]
-            func()
-        except Exception as e:
-            print("Undefined opcode: "+str(self.opcode))
-
-
-    def loadROM(self, rompath):
-        rom = open(rompath, "rb").read()
-        for index in range(0, len(rom)):
-            #Programs by definition start at 0x200, as 0x000->0x200 will be the font file
-            self.memory[index + 0x200] = rom[index]
-            
-            
     def _get_key(self):
         for index in range(16):
             if self.key_inputs[index] == 1:
                 return index
         return -1
 
+    def lookupOP(self, op):
+        try:
+            #Get the appropriate opcode's function, and execute
+            func = self.INSTRUCTION_SET[op]
+            func()
+        except Exception as e:
+            print(e)
+            print(format(op,"02x"))
+
 ######################
 ######OPERATIONS######
 ######################
     def op_0ZZZ(self):
-        return
-
+        self.lookupOP(self.opcode & 0xf0ff)
+    
     def op_00E0(self):
-        print("00E0")
+        self.graphics = [[0 for x in range(32)] for y in range(64)]
+        self.display.clear()
+        self.display.flip()
     #Returns from a subroutine, essentially a return statement
     def op_00EE(self):
         self.pc = self.stack.pop()
@@ -193,6 +245,9 @@ class cpu:
         self.registers[0xf] = self.registers[self.vx] & 0x01
         self.registers[self.vx]  = self.registers[self.vx] << 1
 
+    def op_8ZZZ(self):
+        self.lookupOP((self.opcode & 0xf00f) + 0xff0)
+
     #Skips the next instruction if VX != VY
     def op_9XY0(self):
         if self.registers[self.vx] != self.registers[self.vy]:
@@ -209,7 +264,6 @@ class cpu:
     #Sets vx to a random number masked by NN
     def op_CXNN(self):
         self.registers[self.vx] = (random.randint(0x0,0xFF) & (self.opcode & 0x00FF))
-        print(self.registers[self.vx])
 
     def op_DXYN(self):
         #draws sprites
@@ -226,23 +280,23 @@ class cpu:
                     if self.graphics[x + x_offset][y + y_offset]:
                         self.registers[0xf] = 1
                     self.graphics[x + x_offset][y + y_offset] ^= 1
-                    self.emulator.draw_pixel(x + x_offset, y + y_offset)
-        self.emulator.flip()
+                    self.display.drawxy(x + x_offset, y + y_offset)
+        self.display.flip()
 
     def op_EX9E(self):
         # Skips the next instruction if the key stored in VX is pressed
         key = self.registers[self.vx] & 0xf
-        if self.key_inputs[key] ==1:
+        if self.key_inputs[key] == 1:
             self.pc += 2
-
-    def op_EX93(self):
-        print("EX93")
 
     def op_EXA1(self):
         # Skips the next instruction if the key stored in VX isn't pressed
         key = self.registers[self.vx] & 0xf
-        if self.key_inputs[key] ==0:
+        if self.key_inputs[key] == 0:
             self.pc += 2
+
+    def op_EZZZ(self):
+        self.lookupOP(self.opcode & 0xf0ff)
 
     def op_FX07(self):
         # Sets VX to the value of the delay timer
@@ -279,29 +333,20 @@ class cpu:
 
     def op_FX33(self):
         #store a number as BCD(Binary Coded Decimal)
-        self.memory[self.address_registers] = int(self.registers[self.vx] / 100)
-        self.memory[self.address_registers + 1] = int(self.registers[self.vx] / 10) % 10
-        self.memory[self.address_registers + 2] = (self.registers[self.vx] % 10)
+        self.memory[self.address_register] = int(self.registers[self.vx] / 100)
+        self.memory[self.address_register + 1] = int(self.registers[self.vx] / 10) % 10
+        self.memory[self.address_register + 2] = (self.registers[self.vx] % 10)
 
     def op_F055(self):
         #stores V0 to VX in memory starting at address I
         for index in range(0, self.vx + 1):
-            self.memory[self.address_registers + index] = self.registers[index]
+            self.memory[self.address_register + index] = self.registers[index]
 
     def op_FX65(self):
         #stores V0 to VX with values from memory starting at address I
         for index in range(0, self.vx + 1):
-            self.registers[index] = self.memory[self.address_registers + index]
+            self.registers[index] = self.memory[self.address_register + index]
 
     def op_FZZZ(self):
-        print("FZZZ")
+            self.lookupOP(self.opcode & 0xf0ff)
 
-    def main(self):
-        self.loadROM(sys.argv[1])
-        self.opcode=0
-        #This should error out once the mem limit is hit, for obv reasons
-        while(True):
-            self.cycle()
-
-#chip8 = cpu()
-#chip8.main()
